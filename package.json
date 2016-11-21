@@ -1,0 +1,36 @@
+{
+  "name": "koroutine",
+  "version": "0.0.1",
+  "description": "Small, lightweight coroutine scheduler for node based on ES6 generators",
+  "main": "index.js",
+  "scripts": {
+    "test": "nodeunit ./test/*.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raksoras/koroutine.git"
+  },
+  "keywords": [
+    "coroutine",
+    "generator",
+    "async",
+    "callback",
+    "sequential",
+    "nonblocking"
+  ],
+  "engines": {
+    "node": ">=6.8.0"
+  },
+  "author": "Susheel Aroskar <raksoraslua@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/raksoras/koroutine/issues"
+  },
+  "homepage": "https://github.com/raksoras/koroutine#readme",
+  "devDependencies": {
+    "nodeunit": "^0.10.2"
+  },
+  "dependencies": {
+    "debug": "^2.3.3"
+  }
+}
