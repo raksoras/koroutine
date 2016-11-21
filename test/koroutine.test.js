@@ -12,29 +12,25 @@ function asyncCallError(input, callback, delay) {
     }, delay);
 }
 
-function* singleCallSuccess(kr, input, delay) {
+function* sequentialCallSuccess(kr, input, delay) {
     return yield asyncCallSuccess(input, kr.resume, delay);
 }
 
-function* singleCallError(kr, input, delay) {
+function* sequentialCallError(kr, input, delay) {
     return yield asyncCallError(input, kr.resume, delay);
 }
 
-function* testSingleCall(test) {
-	test.expect(7);
+function* testSequentialCalls(test) {
+	test.expect(3);
 
-	let [r1, r2, r3] = yield* singleCallSuccess(this, "input-1", 200);
-	test.equal(r1, "input-1");
-	test.equal(r2, "arg-1");
-	test.equal(r3, "arg-2");
+	let result = yield* sequentialCallSuccess(this, "input-1", 200);
+	test.deepEqual(result, ['input-1', 'arg-1', 'arg-2']);
 
-	[r1, r2, r3] = yield* singleCallSuccess(this, "input-2", 100);
-	test.equal(r1, "input-2");
-	test.equal(r2, "arg-1");
-	test.equal(r3, "arg-2");
+	result = yield* sequentialCallSuccess(this, "input-2", 100);
+	test.deepEqual(result, ['input-2', 'arg-1', 'arg-2']);
 
 	try {
-        yield* singleCallError(this, "error-1", 150);
+        yield* sequentialCallError(this, "error-1", 150);
     } catch (e) {
 		test.equal(e.message, "error-1");
     }
@@ -42,8 +38,8 @@ function* testSingleCall(test) {
 	test.done();
 }
 
-exports['Test single async calls'] = function(test) {
-	koroutine.run(testSingleCall, 2000, test);
+exports['Test sequential async calls'] = function(test) {
+	koroutine.run(testSequentialCalls, 2000, test);
 }
 
 function* testParallelCalls(test) {
@@ -70,18 +66,18 @@ exports['Test parallel async calls'] = function(test) {
 	koroutine.run(testParallelCalls, 1000, test);
 }
 
-function* testSingleCallTimeout(test) {
+function* testSequentialCallTimeout(test) {
 	test.expect(1);
 	try {
-		yield* singleCallSuccess(this, "input-1", 2000);
+		yield* sequentialCallSuccess(this, "input-1", 2000);
 	} catch (e) {
 		test.equal(e.message, "Coroutine did not finish within 10 ms.");
 	}
 	test.done();
 }
 
-exports['Test single call timeout'] = function(test) {
-	koroutine.run(testSingleCallTimeout, 10, test);
+exports['Test sequential call timeout'] = function(test) {
+	koroutine.run(testSequentialCallTimeout, 10, test);
 }
 
 function* testParallelCallsTimeout(test) {
@@ -110,14 +106,14 @@ exports['Test parallel calls timeout'] = function(test) {
 function* testCancelCoroutine(test) {
 	test.expect(1);
 	try {
-		yield* singleCallSuccess(this, "input-1", 2000);
+		yield* sequentialCallSuccess(this, "input-1", 2000);
 	} catch (e) {
 		test.equal(e.message, "Coroutine cancelled.");
 	}
 	test.done();
 }
 
-exports['Test corountine cancel'] = function(test) {
+exports['Test cancel'] = function(test) {
 	const kr = koroutine.run(testCancelCoroutine, 0, test);
 	kr.cancel();
 }
@@ -132,6 +128,65 @@ function* testSleep(test) {
 }
 
 
-exports['Test corountine sleep'] = function(test) {
+exports['Test sleep'] = function(test) {
 	koroutine.run(testSleep, 1000, test);
 }
+
+function* testGiveUpCPU(test) {
+	test.expect(1);
+	yield this.giveUpCPU();
+	test.equal(1,1);
+	test.done();
+}
+
+
+exports['Test give up CPU (yield)'] = function(test) {
+	koroutine.run(testGiveUpCPU, 100, test);
+}
+function testDoneLatch(test, limit) {
+	let count = 0;
+	const origDone = test.done;
+	return function() {
+		count += 1;
+		if (count >= limit) {
+			origDone();
+		}
+	}
+}
+
+function testExpectAccumulator(test) {
+	let accCount = 0;
+	const origExpect = test.expect;
+	return function(count) {
+		accCount += count;
+		origExpect(accCount);
+	}
+}
+
+exports['Test sequential async calls in multiple simultaneous coroutines'] = function(test) {
+	test.expect = testExpectAccumulator(test);
+	test.done = testDoneLatch(test, 3);
+	koroutine.run(testSequentialCalls, 2000, test);
+	koroutine.run(testSequentialCalls, 2000, test);
+	koroutine.run(testSequentialCalls, 2000, test);
+}
+
+exports['Test parallel async calls in multiple simultaneous coroutines'] = function(test) {
+	test.expect = testExpectAccumulator(test);
+	test.done = testDoneLatch(test, 3);
+	koroutine.run(testParallelCalls, 1000, test);
+	koroutine.run(testParallelCalls, 1000, test);
+	koroutine.run(testParallelCalls, 1000, test);
+}
+
+exports['Test mixed calls in multiple simultaneous coroutines'] = function(test) {
+	test.expect = testExpectAccumulator(test);
+	test.done = testDoneLatch(test, 6);
+	koroutine.run(testSequentialCalls, 2000, test);
+	koroutine.run(testParallelCalls, 1000, test);
+	koroutine.run(testSequentialCalls, 2000, test);
+	koroutine.run(testParallelCalls, 1000, test);
+	koroutine.run(testParallelCalls, 1000, test);
+	koroutine.run(testSequentialCalls, 2000, test);
+}
+
