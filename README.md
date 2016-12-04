@@ -5,8 +5,10 @@ Small, lightweight coroutine scheduler for node.js based on ES6 generators
 
 - [Install](#install)
 - [Introduction](#introduction)
-- [Sequential async calls example](#sequential-async-calls-example)
-- [Parallel async calls example](#parallel-async-calls-example)
+- [Sequential Async Calls Example](#sequential-async-calls-example)
+- [Parallel Async Calls Example](#parallel-async-calls-example)
+- [Koroutine Library Object Methods](#koroutine-library-object-methods)
+- [Coroutine Context Methods](#coroutine-context-methods)
 
 ## Install
 
@@ -24,11 +26,11 @@ of them to complete before retrieving results/errors for each of the calls.
 ## Sequential async calls example
 
 Use `Koroutine.run(generator_funtion, timeout, argument_1, argument_2, ...)` to run any ES6 generator function 
-as a coroutine. It runs your generator function with `this` bound to coroutine context while passing in all the
-arguments passed to run() after the second parameter `timeout`. You can then pass `this.resume` as a callback to any async 
-function you may want to call. `resume` follows Node's callback convention - i.e. first parameter is
-error followed by results or data parameters. If the async function returns an error, it is thrown as an exception inside the
-generator function body as shown below.
+as a coroutine. It runs your generator function with `this` bound to the coroutine context while passing in all the
+arguments passed to run() after the second parameter `timeout` as function arguments. You can then pass `this.resume` as a 
+callback to any async function you may want to call from inside of the `generator_function`. `resume` follows Node's callback 
+convention - i.e. first parameter is error followed by results or data parameters. If the async function returns an error, it 
+is thrown as an exception inside the generator function body as shown below.
 
 The second parameter `timeout` is the maximum amount of time in milliseconds that the coroutine is allowed to run. If it 
 runs for more than timeout milliseconds, an exception with cause = "timedout" is thrown inside the generator function. 
@@ -83,3 +85,25 @@ function* exampleKoroutine(input1, input2) {
     console.log(future2.error);
 }
 ```
+## Koroutine Library Object Methods
+
+### run(generator, timeout, ...rest)
+Runs generator function as a coroutine. 
+
+   `this` is bound to coroutine context object (see below) inside generator function.  
+   `timeout` is maximum number of milliseconds coroutine is allowed to run. If it runs for more than that exception is thrown inside generator function with cause = 'timedout'.   
+   `...rest`  are rest of the arguments that are passed in to generator function as function arguments.  
+
+### *join(...futures)
+
+## Coroutine Context Methods
+
+### resume
+
+### future
+
+### sleep
+
+### defer
+
+### cancel
