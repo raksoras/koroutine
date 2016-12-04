@@ -21,7 +21,7 @@ function* sequentialCallError(kr, input, delay) {
 }
 
 function* testSequentialCalls(test) {
-    test.expect(3);
+    test.expect(4);
 
     let result = yield* sequentialCallSuccess(this, "input-1", 200);
     test.deepEqual(result, ['input-1', 'arg-1', 'arg-2']);
@@ -33,6 +33,7 @@ function* testSequentialCalls(test) {
             yield* sequentialCallError(this, "error-1", 150);
     } catch (e) {
         test.equal(e.message, "error-1");
+        test.equal(e.cause, "exception");
     }
 
     test.done();
@@ -43,7 +44,7 @@ exports['Test sequential async calls'] = function(test) {
 }
 
 function* testParallelCalls(test) {
-    test.expect(3);
+    test.expect(4);
 
     const f1 = this.future();
     asyncCallSuccess("input-1", f1, 200);
@@ -59,6 +60,7 @@ function* testParallelCalls(test) {
     test.deepEqual(f1.data, ['input-1', 'arg-1', 'arg-2']);
     test.deepEqual(f2.data, ['input-2', 'arg-1', 'arg-2']);
     test.equal(f3.error.message, 'error-1');
+    test.equal(f3.error.cause, "exception");
     test.done()
 }
 
@@ -71,7 +73,7 @@ function* testSequentialCallTimeout(test) {
     try {
         yield* sequentialCallSuccess(this, "input-1", 2000);
     } catch (e) {
-        test.equal(e.message, "Coroutine did not finish within 10 ms.");
+        test.equal(e.cause, "timedout");
     }
     test.done();
 }
@@ -92,7 +94,7 @@ function* testParallelCallsTimeout(test) {
     try {
         yield* koroutine.join(f1, f2);
     } catch (e) {
-        test.equal(e.message, "Coroutine did not finish within 400 ms.");
+        test.equal(e.cause, "timedout");
         test.deepEqual(f1.data, ['input-1', 'arg-1', 'arg-2']);
     }
 
@@ -108,7 +110,7 @@ function* testCancelCoroutine(test) {
     try {
         yield* sequentialCallSuccess(this, "input-1", 2000);
     } catch (e) {
-        test.equal(e.message, "Coroutine cancelled.");
+        test.equal(e.cause, "canceled");
     }
     test.done();
 }
