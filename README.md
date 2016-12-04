@@ -66,6 +66,12 @@ ko.run(exampleKoroutine, 0, "myinput1", "myinput2");
 
 ## Parallel async calls example
 
+You can also fire multiple async calls in parallel using Koroutine and then wait for all of them to complete. To do this, get 
+`future` (function) object by calling `this.future()` for each of the async calls and pass that as a callback in place of 
+`this.resume`. You can then wait for all of them to complete by calling `yield* koroutine.join(future1, future2, ...)`. It 
+returns when all the calls have completed - either succesfully or by returning error. Upon return, each future object either 
+has its `data` member set to result (in case of a succesfull call) or its `error` member set to the error returned by the corresponding call.
+
 ```js
 function* exampleKoroutine(input1, input2) {
     const future1 = this.future();
