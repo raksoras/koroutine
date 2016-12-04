@@ -17,34 +17,22 @@ $ npm install koroutine
 ## Introduction
 
 This is a 100% javascript implementation of coroutine scheduler based on ES6 generators. It can be used 
-to replace callback spaghetti async code with simpler sequential looking code that is still 100% async.
-You can either make async calls one after other - and koroutine will resume your generator function automatically 
-when the async calls returns - or fire bunch of async calls in parallel and wait for all of them to finish before
-retrieving results/errors for each of the calls
+to replace callback spaghetti async code with simpler, sequential looking code that is still 100% async.
+You can either make async calls one after other or fire bunch of async calls in parallel and wait for all
+of them to complete before retrieving results/errors for each of the calls.
 
 ## Sequential async calls example
 
-```js
-const ko = require('koroutine');
+Use `Koroutine.run(generator_funtion, timeout, argument_1, argument_2, ...)` to run any ES6 generator function 
+as a coroutine. It runs your generator function with `this` bound to coroutine context while passing in all the
+arguments passed to run() after the second parameter `timeout`. You can then pass `this.resume` as a callback to any async 
+function you may want to call. `resume` follows Node's callback convention - i.e. first parameter is
+error followed by results or data parameters. If the async function returns an error it is thrown as an exception inside the
+generator function body as shown below.
 
-function dummyAsyncCall(input, callback, delay) {
-    setTimeout(function() {
-        const result = input+"-ok";
-        callback(null, result);
-    }, delay);
-}
-
-function* exampleKoroutine(input1, input2) {
-    const result1 = yield dummyAsyncCall(input1, this.resume, 1000);
-    console.log(result1)
-    const result2 = yield dummyAsyncCall(input2, this.resume, 2000);
-    console.log(result2)
-}
-
-ko.run(exampleKoroutine, 0, "myinput1", "myinput2");
-```
-
-## Parallel async calls example
+The second parameter `timeout` specified maximum amount of time in milliseconds coroutine is allowed to run. If it runs for
+more than timeout milliseconds an exception with cause "timedout" is thrown inside the generator function. timeout=0 means
+no maximum limit (infinite timeout).
 
 ```js
 const ko = require('koroutine');
@@ -62,6 +50,23 @@ function dummyAsyncErrorCall(input, callback, delay) {
     }, delay);
 }
 
+
+function* exampleKoroutine(input1, input2) {
+    try {
+        const result1 = yield dummyAsyncSuccessCall(input1, this.resume, 1000);
+        console.log(result1)
+        yield dummyAsyncErrorCall(input2, this.resume, 2000);
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+ko.run(exampleKoroutine, 0, "myinput1", "myinput2");
+```
+
+## Parallel async calls example
+
+```js
 function* exampleKoroutine(input1, input2) {
     const future1 = this.future();
     dummyAsyncSuccessCall(input1, future1, 1000);
@@ -71,6 +76,4 @@ function* exampleKoroutine(input1, input2) {
     console.log(future1.data);
     console.log(future2.error);
 }
-
-ko.run(exampleKoroutine, 0, "myinput1", "myinput2");
 ```
