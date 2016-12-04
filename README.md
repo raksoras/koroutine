@@ -18,6 +18,9 @@ $ npm install mysql
 
 This is a 100% javascript implementation of coroutine scheduler based on ES6 generators. It can be used 
 to replace callback spaghetti async code with simpler sequential looking code that is still 100% async.
+You can either make async calls one after other - and koroutine will resume your generator function automatically 
+when the async calls returns - or fire bunch of async calls in parallel and wait for all of them to finish before
+retrieving results/errors for each of the calls
 
 ## Sequential async calls example
 
