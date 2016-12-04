@@ -11,7 +11,7 @@ Small, lightweight coroutine scheduler for node.js based on ES6 generators
 ## Install
 
 ```sh
-$ npm install mysql
+$ npm install koroutine
 ```
 
 ## Introduction
