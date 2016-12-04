@@ -134,16 +134,15 @@ exports['Test sleep'] = function(test) {
     koroutine.run(testSleep, 1000, test);
 }
 
-function* testGiveUpCPU(test) {
+function* testDefer(test) {
     test.expect(1);
-    yield this.giveUpCPU();
+    yield this.defer();
     test.equal(1,1);
     test.done();
 }
 
-
-exports['Test give up CPU (yield)'] = function(test) {
-    koroutine.run(testGiveUpCPU, 100, test);
+exports['Test defer (yield)'] = function(test) {
+    koroutine.run(testDefer, 100, test);
 }
 
 function testDoneLatch(test, limit) {
