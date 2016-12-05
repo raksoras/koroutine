@@ -111,8 +111,8 @@ function* testCancelCoroutine(test) {
         yield* sequentialCallSuccess(this, "input-1", 2000);
     } catch (e) {
         test.equal(e.cause, "canceled");
+        test.done();
     }
-    test.done();
 }
 
 exports['Test cancel'] = function(test) {
