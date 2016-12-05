@@ -90,20 +90,28 @@ function* exampleKoroutine(input1, input2) {
 ### run(generator, timeout, ...rest)
 Runs generator function as a coroutine. 
 
-   `this` is bound to coroutine context object (see below) inside generator function.  
-   `timeout` is maximum number of milliseconds coroutine is allowed to run. If it runs for more than that exception is thrown inside generator function with cause = 'timedout'.   
-   `...rest`  are rest of the arguments that are passed in to generator function as function arguments.  
+  * __this__ is bound to coroutine context object (see below) inside generator function.  
+  * __timeout__ is maximum number of milliseconds coroutine is allowed to run. If it runs for more than that exception is thrown inside generator function with cause = 'timedout'.   
+  * __...rest__  are rest of the arguments that are passed in to generator function as function arguments.  
 
 ### *join(...futures)
+Non-blocking wait till all the async operations represented by futures passed are complete. On completion each future either has `future.data` set to the result of the call (in case of success) or `future.error` set to the error returned by the call.
 
 ## Coroutine Context Methods
 
-### resume
+### this.resume
+Callback you can pass to any async calls you want to make from inside the generator function. `this` is bound to current coroutine inside generator function. Resume follows Node js callback convention where first parameter is an error followed by one or more result parameters
 
-### future
+### this.future()
+Returns a future function object which can be passed as a callback to any async call you wish to make. Futures can be used as callbacks in place of this.resume when you want to make multiple async calls in paralell and then wait for all of them to finish at a single join point inside your code. See [Parallel Async Calls Example](#parallel-async-calls-example) above
 
-### sleep
+### this.sleep(ms)
+Non-blocking sleep for `ms` number of milliseconds
 
-### defer
+### this.defer()
+Gives up CPU voluntarily. The coroutine will be resumed on the next event loop turn. Similar to `setImmediate()` or Thread.yield() in pthread library.
+
+### this.cancel()
+Cancel the coroutine from outside the the running coroutine. Causes an exception to be thrown inside the canceled coroutine with cause = "canceled"
 
 ### cancel
