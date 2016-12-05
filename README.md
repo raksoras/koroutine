@@ -1,6 +1,7 @@
 # koroutine
 
 [![Build Status](https://travis-ci.org/raksoras/koroutine.svg?branch=master)](https://travis-ci.org/raksoras/koroutine)
+[![Coverage Status](https://coveralls.io/repos/github/raksoras/koroutine/badge.svg?branch=master)](https://coveralls.io/github/raksoras/koroutine?branch=master)
 
 Small, lightweight coroutine scheduler for node.js, based on ES6 generators
 
