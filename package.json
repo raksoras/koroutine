@@ -4,7 +4,8 @@
   "description": "Small, lightweight coroutine scheduler for node based on ES6 generators",
   "main": "index.js",
   "scripts": {
-    "test": "nodeunit ./test/*.test.js"
+    "test": "nodeunit ./test/*.test.js",
+    "cover": "node_modules/istanbul/lib/cli.js cover node_modules/nodeunit/bin/nodeunit ./test/*.test.js"
   },
   "repository": {
     "type": "git",
@@ -28,6 +29,8 @@
   },
   "homepage": "https://github.com/raksoras/koroutine#readme",
   "devDependencies": {
+    "coveralls": "^2.11.15",
+    "istanbul": "^0.4.5",
     "nodeunit": "^0.10.2"
   },
   "dependencies": {
