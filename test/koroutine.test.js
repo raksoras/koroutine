@@ -192,3 +192,20 @@ exports['Test mixed calls in multiple simultaneous coroutines'] = function(test)
     koroutine.run(testSequentialCalls, 2000, test);
 }
 
+function* testCoroutineCurrentCtx(test, input) {
+    test.expect(1);
+    koroutine.current.context.my_var = input;
+    yield this.sleep(200);
+    test.equal(koroutine.current.context.my_var, input);
+    test.done();
+}
+
+exports['Test koroutine current context'] = function(test) {
+    test.expect = testExpectAccumulator(test);
+    test.done = testDoneLatch(test, 3);
+    koroutine.run(testCoroutineCurrentCtx, 1000, test, "first");
+    koroutine.run(testCoroutineCurrentCtx, 1000, test, "second");
+    koroutine.run(testCoroutineCurrentCtx, 1000, test, "third");
+}
+
+
