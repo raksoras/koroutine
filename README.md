@@ -10,7 +10,15 @@ Small, lightweight non-blocking coroutine scheduler for node.js based on ES6 gen
 - [Install](#install)
 - [Introduction](#introduction)
 - [Koroutine Library Object Methods](#koroutine-library-object-methods)
+  * [koroutine.run(generatorFn, timeout, ...rest)](#koroutinerungeneratorfn-timeout-rest)
+  * [koroutine.join(...futures)](#koroutinejoinfutures)
+  * [koroutine.current.context](#koroutinecurrentcontext)
 - [Coroutine Context Methods](#coroutine-context-methods)
+  * [this.resume](#thisresume)
+  * [this.future()](thisfuture)
+  * [this.sleep(ms)](#thissleepms)
+  * [this.defer()](#thisdefer)
+  * [this.cancel()](#thiscancel)
 
 ## Install
 
@@ -34,7 +42,6 @@ Runs supplied generator function as a coroutine.
   * __...rest__  are rest of the arguments that are passed to generator function as its function arguments.  
 
 #### Sequential async calls example
-
 Inside generator function `this` is bound to the running coroutine's context. You can pass `this.resume` as a 
 callback to any async function you may want to call from inside the generator function. `resume` follows Node's callback 
 convention, i.e. first parameter is error followed by results or data parameters. If the async function returns an error, it 
@@ -73,7 +80,6 @@ koroutine.run(exampleKoroutine, 0, "myinput1", "myinput2");
 Non-blocking wait till all the async operations represented by the supplied futuresare complete. `future`s are obtained by calling `this.future()` from inside the generator function. On completion each future either has its `future.data` set to the result of the call (in case of success) or its `future.error` set to the error returned by the call. `koroutine.join()` returns total number of errors encountred.
 
 #### Parallel async calls example
-
 You can fire multiple async calls in parallel and then wait for all of them to complete at a single point in your code as shown below.
 
 ```js
