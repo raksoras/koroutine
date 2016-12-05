@@ -76,12 +76,17 @@ future object will either have its `data` member set to result - in case of a su
 the error returned by the corresponding call.
 
 ```js
+const ko = require('koroutine');
+
+//dummyAsyncSuccessCall() and dummyAsyncErrorCall() as defined in the example above
+
 function* exampleKoroutine(input1, input2) {
     const future1 = this.future();
     dummyAsyncSuccessCall(input1, future1, 1000);
     const future2 = this.future();
     dummyAsyncErrorCall(input2, future2, 1000);
     const numErrors = yield* ko.join(future1, future2);
+    console.log(numErrors);
     console.log(future1.data);
     console.log(future2.error);
 }
