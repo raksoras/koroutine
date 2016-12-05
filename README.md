@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/raksoras/koroutine.svg?branch=master)](https://travis-ci.org/raksoras/koroutine)
 [![Coverage Status](https://coveralls.io/repos/github/raksoras/koroutine/badge.svg?branch=master)](https://coveralls.io/github/raksoras/koroutine?branch=master)
 
-Small, lightweight non-blocking coroutine scheduler for node.js based on ES6 generators
+Small, lightweight, non-blocking coroutine scheduler for node.js using ES6 generators
 
 ##Table of Contents
 
@@ -45,7 +45,7 @@ Runs supplied generator function as a coroutine.
 Inside generator function `this` is bound to the running coroutine's context. You can pass `this.resume` as a 
 callback to any async function you may want to call from inside the generator function. `resume` follows Node's callback 
 convention, i.e. first parameter is error followed by results or data parameters. Koroutine automatically resumes your 
-function when the callback is called by the async functio. If the async function returns an error, it 
+function when the callback is called by the async function. If the async function returns an error, it 
 is thrown as an exception inside the generator function body as shown below.
 ```js
 const koroutine = require('koroutine');
@@ -80,7 +80,7 @@ koroutine.run(exampleKoroutine, 0, "myinput1", "myinput2");
 Non-blocking wait till all the async operations represented by the supplied futures are complete. `future`s are obtained by calling `this.future()` from inside the generator function. On completion each future either has its `future.data` set to the result of the call (in case of success) or its `future.error` set to the error returned by the call. `koroutine.join()` returns total number of errors encountred.
 
 #### Parallel async calls example
-You can fire multiple async calls in parallel and then wait for all of them to complete at a single point in your code as shown below.
+You can fire multiple async calls in parallel and then wait for all of them to complete at a single point in your code as shown below:
 
 ```js
 const koroutine = require('koroutine');
@@ -108,10 +108,10 @@ Current running coroutine's local variable storage. Similar to thread local vari
 koroutine library will switch to the appropriate `current.context` automatically when it swicthes between coroutines. A coroutine can store its local copy of any variable in the context like this:
 
 ```js
-const ko = require('koroutine');
+const koroutine = require('koroutine');
 
 function* coroutineFn() {
-    ko.current.context.my_var = "my_local_value";
+    koroutine.current.context.my_var = "my_local_value";
     ...
 }
 ```
