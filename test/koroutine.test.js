@@ -208,4 +208,10 @@ exports['Test koroutine current context'] = function(test) {
     koroutine.run(testCoroutineCurrentCtx, 1000, test, "third");
 }
 
-
+function * testExceptionThrower(test) {
+    throw new Error("Uncaught Exception!");
+}
+exports['Test coroutine throwing uncaught exception'] = function(test) {
+    koroutine.run(testExceptionThrower, 1000, test);
+    test.done();
+}
