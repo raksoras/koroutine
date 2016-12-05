@@ -1,4 +1,7 @@
 # koroutine
+
+[![Build Status](https://travis-ci.org/raksoras/koroutine.svg?branch=master)](https://travis-ci.org/raksoras/koroutine)
+
 Small, lightweight coroutine scheduler for node.js, based on ES6 generators
 
 ##Table of Contents
