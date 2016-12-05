@@ -5,7 +5,7 @@
 
 Small, lightweight, non-blocking coroutine scheduler for node.js using ES6 generators
 
-##Table of Contents
+## Table of Contents
 
 - [Install](#install)
 - [Introduction](#introduction)
