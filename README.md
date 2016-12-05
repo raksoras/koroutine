@@ -25,7 +25,7 @@ of them to complete before retrieving results/errors for each of the calls.
 
 ## Sequential async calls example
 
-Use `Koroutine.run(generator_funtion, timeout, argument_1, argument_2, ...)` to run any ES6 generator function 
+Use `koroutine.run(generator_funtion, timeout, argument_1, argument_2, ...)` to run any ES6 generator function 
 as a coroutine. It runs your generator function with `this` bound to the running coroutine context passing in all the
 arguments passed to run() after the second parameter `timeout` as function arguments. You can then pass `this.resume` as a 
 callback to any async function you may want to call from inside of the `generator_function`. `resume` follows Node's callback 
@@ -86,7 +86,7 @@ function* exampleKoroutine(input1, input2) {
     console.log(future2.error);
 }
 ```
-## Koroutine Library Object Methods
+## koroutine Library Object Methods
 
 ### run(generator, timeout, ...rest)
 Runs generator function as a coroutine. 
@@ -98,6 +98,19 @@ Runs generator function as a coroutine.
 ### *join(...futures)
 Non-blocking wait till all the async operations represented by the futures passed are complete. On completion each future either has its `future.data` set to the result of the call (in case of success) or its `future.error` set to the error returned by the call.
 
+### koroutine.current.context
+Current running coroutine's variable storage. Similar to thread local variable in Java or pthread. All the typical issues with usage of thread local variables apply so use it with caution!
+
+koroutine library will swap the appropriate `current.context` automatically when it swicthes between coroutines. A coroutine can store its local copy of any variable in the context like this
+```js
+const ko = require('koroutine');
+
+function* coroutineFn() {
+    ko.current.context.my_var = "my_local_value";
+    ...
+}
+```
+variables stored in `koroutine.current.context` are local to the running coroutine and are not shared between two coroutines even if they share the same name.
 ## Coroutine Context Methods
 
 ### this.resume
