@@ -30,7 +30,7 @@ function* testSequentialCalls(test) {
     test.deepEqual(result, ['input-2', 'arg-1', 'arg-2']);
 
     try {
-            yield* sequentialCallError(this, "error-1", 150);
+        yield* sequentialCallError(this, "error-1", 150);
     } catch (e) {
         test.equal(e.message, "error-1");
         test.equal(e.cause, "exception");
@@ -211,7 +211,11 @@ exports['Test koroutine current context'] = function(test) {
 function * testExceptionThrower(test) {
     throw new Error("Uncaught Exception!");
 }
+
 exports['Test coroutine throwing uncaught exception'] = function(test) {
-    koroutine.run(testExceptionThrower, 1000, test);
-    test.done();
+    try {
+        koroutine.run(testExceptionThrower, 1000, test);
+    } catch (e) {
+        test.done();
+    }
 }
