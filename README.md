@@ -123,11 +123,11 @@ variables stored in `koroutine.current.context` are local to the running corouti
 ### this.resume
 Callback you can pass to any async calls you want to make from inside the generator function. `resume` follows Node js 
 callback convention where first parameter is an error followed by one or more result parameters. Resumes paused coroutine when 
-invoked by the async function as a callback.
+invoked by the async function as a callback. See [sequential async calls example](#sequential-async-calls-example) above.
 
 ### this.future()
 Returns a `future` function object that can be used as a callback in place of `this.resume` when you want to make multiple 
-async calls in paralell. See [Parallel Async Calls Example](#parallel-async-calls-example) above.
+async calls in paralell. See [parallel async calls example](#parallel-async-calls-example) above.
 
 ### this.sleep(ms)
 Non-blocking sleep for `ms` number of milliseconds.
