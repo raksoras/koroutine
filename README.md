@@ -9,7 +9,7 @@ Small, lightweight, non-blocking coroutine scheduler for node.js using ES6 gener
 
 - [Install](#install)
 - [Introduction](#introduction)
-- [Koroutine Library Object Methods](#koroutine-object-methods)
+- [Koroutine Library Methods](#koroutine-library-methods)
   * [koroutine.run(generatorFn, timeout, ...rest)](#koroutinerungeneratorfn-timeout-rest)
   * [koroutine.join(...futures)](#koroutinejoinfutures)
   * [koroutine.current.context](#koroutinecurrentcontext)
