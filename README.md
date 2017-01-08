@@ -9,7 +9,7 @@ Small, lightweight, non-blocking coroutine scheduler for node.js using ES6 gener
 
 - [Install](#install)
 - [Introduction](#introduction)
-- [Koroutine Library Object Methods](#koroutine-library-object-methods)
+- [Koroutine Library Object Methods](#koroutine-object-methods)
   * [koroutine.run(generatorFn, timeout, ...rest)](#koroutinerungeneratorfn-timeout-rest)
   * [koroutine.join(...futures)](#koroutinejoinfutures)
   * [koroutine.current.context](#koroutinecurrentcontext)
@@ -31,13 +31,13 @@ $ npm install koroutine
 100% javascript implementation of a coroutine scheduler that uses ES6 generators. It can be used 
 to replace async callback spaghetti code with simpler, sequential looking code that is still 100% async.
 
-## Koroutine Library Object Methods
+## Koroutine Library Methods
 
 ###koroutine.run(generatorFn, timeout, ...rest)
 
 Runs supplied generator function as a coroutine. 
 
-  * __this__ is bound to the running coroutine object (see [coroutine context methods](#coroutine-object-methods) below) inside the generator function.  
+  * __this__ is bound to the running coroutine object (see [coroutine object methods](#coroutine-object-methods) below) inside the generator function.  
   * __timeout__ is maximum number of milliseconds the coroutine is allowed to run. If it runs beyond that limit it is terminated and an exception is thrown inside the generator function with e.cause="timedout". timeout=0 means no (infinite) timeout.  
   * __...rest__  are rest of the arguments that are passed to generator function as its function arguments.  
 
