@@ -15,7 +15,7 @@ Small, lightweight, non-blocking coroutine scheduler for node.js using ES6 gener
   * [koroutine.current.context](#koroutinecurrentcontext)
 - [Coroutine Context Methods](#coroutine-context-methods)
   * [this.resume](#thisresume)
-  * [this.future(timeout)](#thisfuture)
+  * [this.future(timeout)](#thisfuturetimeout)
   * [this.sleep(ms)](#thissleepms)
   * [this.defer()](#thisdefer)
   * [this.interrupt()](#thiscancel)
