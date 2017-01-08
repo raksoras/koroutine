@@ -15,7 +15,7 @@ Small, lightweight, non-blocking coroutine scheduler for node.js using ES6 gener
   * [koroutine.current.context](#koroutinecurrentcontext)
 - [Coroutine Context Methods](#coroutine-context-methods)
   * [this.resume](#thisresume)
-  * [this.future()](#thisfuture)
+  * [this.future(timeout)](#thisfuture)
   * [this.sleep(ms)](#thissleepms)
   * [this.defer()](#thisdefer)
   * [this.interrupt()](#thiscancel)
@@ -132,7 +132,7 @@ invoked by the async function as a callback. See [sequential async calls example
 ### this.future(timeout)
 Returns a `future` function object that can be used as a callback in place of `this.resume` when you want to make multiple 
 async calls in paralell. See [parallel async calls example](#parallel-async-calls-example) above.
-Optional `timeout` parameter, if provided, specified number of milliseconds after which the future will time out and the call
+Optional `timeout` parameter, if provided, specifies number of milliseconds after which the future will time out and the call
 will return with `future.error.cause` set to 'timedout'  
 
 ### this.sleep(ms)
