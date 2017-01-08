@@ -37,7 +37,7 @@ to replace async callback spaghetti code with simpler, sequential looking code t
 
 Runs supplied generator function as a coroutine. 
 
-  * __this__ is bound to the running coroutine's context object (see [coroutine context methods](#coroutine-context-methods) below) inside the generator function.  
+  * __this__ is bound to the running coroutine object (see [coroutine context methods](#coroutine-object-methods) below) inside the generator function.  
   * __timeout__ is maximum number of milliseconds the coroutine is allowed to run. If it runs beyond that limit it is terminated and an exception is thrown inside the generator function with e.cause="timedout". timeout=0 means no (infinite) timeout.  
   * __...rest__  are rest of the arguments that are passed to generator function as its function arguments.  
 
@@ -119,9 +119,9 @@ function* coroutineFn() {
     ...
 }
 ```
-variables stored in `koroutine.current.context` are local to the running coroutine and are not shared between two coroutines even if they share the same name.
+variables stored in `koroutine.current.context` are local to the running coroutine and are not shared between two coroutines even if they share the same variable name.
 
-## Coroutine Context Methods
+## Coroutine Object Methods
 `this` is bound to current coroutine context inside the generator function.
 
 ### this.resume
