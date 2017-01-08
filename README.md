@@ -133,7 +133,8 @@ invoked by the async function as a callback. See [sequential async calls example
 Returns a `future` function object that can be used as a callback in place of `this.resume` when you want to make multiple 
 async calls in paralell. See [parallel async calls example](#parallel-async-calls-example) above.
 Optional `timeout` parameter, if provided, specifies number of milliseconds after which the future will time out and the call
-will return with `future.error.cause` set to 'timedout'  
+will return with `future.error.cause` set to 'timedout'. To not set any timeout, omit `timeout` parameter when creating
+future.
 
 ### this.sleep(ms)
 Non-blocking sleep for `ms` number of milliseconds.
