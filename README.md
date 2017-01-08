@@ -15,10 +15,10 @@ Small, lightweight, non-blocking coroutine scheduler for node.js using ES6 gener
   * [koroutine.current.context](#koroutinecurrentcontext)
 - [Coroutine Context Methods](#coroutine-context-methods)
   * [this.resume](#thisresume)
-  * [this.future()](#thisfuture)
+  * [this.future(timeout)](#thisfuture)
   * [this.sleep(ms)](#thissleepms)
   * [this.defer()](#thisdefer)
-  * [this.cancel()](#thiscancel)
+  * [this.interrupt()](#thiscancel)
 
 ## Install
 
@@ -106,8 +106,10 @@ koroutine.run(exampleKoroutine, 0, "myinput1", "myinput2");
 ```
 
 ### koroutine.current.context
-Current running coroutine's local variable storage. Similar to thread local variable in Java or pthread. All the typical hard to track and debug issues with the usage of thread local variables apply so use it with caution and sparringly!
-koroutine library will switch to the appropriate `current.context` automatically when it swicthes between coroutines. A coroutine can store its local copy of any variable in the context like this:
+Current running coroutine's local variable storage. Similar to thread local variable in Java or pthread. All the typical hard
+to track and debug issues with the usage of thread local variables apply so use it with caution and sparringly!
+koroutine library will switch to the appropriate `current.context` automatically when it swicthes between coroutines. A
+coroutine can store its local copy of any variable in the context like this:
 
 ```js
 const koroutine = require('koroutine');
@@ -127,9 +129,12 @@ Callback you can pass to any async calls you want to make from inside the genera
 callback convention where first parameter is an error followed by one or more result parameters. Resumes paused coroutine when 
 invoked by the async function as a callback. See [sequential async calls example](#sequential-async-calls-example) above.
 
-### this.future()
+### this.future(timeout)
 Returns a `future` function object that can be used as a callback in place of `this.resume` when you want to make multiple 
 async calls in paralell. See [parallel async calls example](#parallel-async-calls-example) above.
+Optional `timeout` parameter, if provided, specifies number of milliseconds after which the future will time out and the call
+will return with `future.error.cause` set to 'timedout'. To not set any timeout, omit `timeout` parameter when creating
+future.
 
 ### this.sleep(ms)
 Non-blocking sleep for `ms` number of milliseconds.
@@ -138,6 +143,7 @@ Non-blocking sleep for `ms` number of milliseconds.
 Gives up CPU voluntarily. The coroutine will be resumed automatically on the next event loop turn. Similar to `setImmediate()` 
 or Thread.yield() in pthread library.
 
-### this.cancel()
-Allows cancelling the coroutine from outside the running coroutine. Causes an exception to be thrown inside the canceled coroutine with e.cause="canceled"
+### this.interrupt()
+Allows interrupying of the coroutine from outside the running coroutine. Causes an exception to be thrown inside the
+interrupted coroutine with e.cause="canceled"
 
