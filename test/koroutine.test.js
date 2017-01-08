@@ -1,3 +1,5 @@
+'use strict';
+
 const koroutine = require('..');
 
 function asyncCallSuccess (input, callback, delay) {
@@ -35,7 +37,6 @@ function* testSequentialCalls (test) {
     test.equal(e.message, 'error-1');
     test.equal(e.cause, 'exception');
   }
-
   test.done();
 }
 
@@ -67,6 +68,43 @@ function* testParallelCalls (test) {
 
 exports['Test parallel async calls'] = function (test) {
   koroutine.run(testParallelCalls, 1000, test);
+};
+
+exports['Test future timeout'] = function (test) {
+  koroutine.run(function* (test) {
+    test.expect(4);
+
+    const f1 = this.future(100);
+    asyncCallSuccess('input-1', f1, 8000);
+
+    const f2 = this.future(2000);
+    asyncCallSuccess('input-2', f2, 300);
+
+    const f3 = this.future(200);
+    asyncCallError('error-1', f3, 8000);
+
+    const numErrors = yield* koroutine.join(f1, f2, f3);
+    test.equal(numErrors, 2);
+    test.equal(f1.error.cause, 'timedout');
+    test.deepEqual(f2.data, ['input-2', 'arg-1', 'arg-2']);
+    test.equal(f3.error.cause, 'timedout');
+    test.done();
+  }, 1000, test);
+};
+
+exports['Test koroutine timeout with future'] = function (test) {
+  koroutine.run(function* (test) {
+    test.expect(1);
+    try {
+      const ft = this.future(100);
+      asyncCallSuccess('input-2', ft, 300);
+      yield* koroutine.join(ft);
+      test.ok(false);
+    } catch (e) {
+      test.equal(e.cause, 'timedout');
+      test.done();
+    }
+  }, 10, test);
 };
 
 function* testSequentialCallTimeout (test) {
@@ -106,19 +144,55 @@ exports['Test parallel calls timeout'] = function (test) {
   koroutine.run(testParallelCallsTimeout, 400, test);
 };
 
-function* testCancelCoroutine (test) {
+function* testInterruptCoroutine (test) {
   test.expect(1);
   try {
     yield* sequentialCallSuccess(this, 'input-1', 2000);
   } catch (e) {
-    test.equal(e.cause, 'canceled');
+    test.equal(e.cause, 'interrupted');
     test.done();
   }
 }
 
-exports['Test cancel'] = function (test) {
-  const kr = koroutine.run(testCancelCoroutine, 0, test);
-  kr.cancel();
+exports['Test interrupt'] = function (test) {
+  const kr = koroutine.run(testInterruptCoroutine, 0, test);
+  kr.interrupt();
+};
+
+function* testContinueAfterInterrupt (test) {
+  test.expect(2);
+  try {
+    yield* sequentialCallSuccess(this, 'input-1', 1000);
+    test.ok(false);
+  } catch (e) {
+    test.equal(e.cause, 'interrupted');
+  }
+
+  let result = yield* sequentialCallSuccess(this, 'input-2', 100);
+  test.deepEqual(result, ['input-2', 'arg-1', 'arg-2']);
+  test.done();
+}
+
+exports['Test continue after interrupt'] = function (test) {
+  const kr = koroutine.run(testContinueAfterInterrupt, 0, test);
+  kr.interrupt();
+};
+
+exports['Test continue after error'] = function (test) {
+  koroutine.run(function* (test) {
+    test.expect(3);
+    try {
+      yield* sequentialCallError(this, 'error-1', 150);
+      test.ok(false);
+    } catch (e) {
+      test.equal(e.message, 'error-1');
+      test.equal(e.cause, 'exception');
+    }
+
+    let result = yield* sequentialCallSuccess(this, 'input-2', 100);
+    test.deepEqual(result, ['input-2', 'arg-1', 'arg-2']);
+    test.done();
+  }, 0, test);
 };
 
 function* testSleep (test) {
@@ -135,14 +209,28 @@ exports['Test sleep'] = function (test) {
 };
 
 function* testDefer (test) {
-  test.expect(1);
+  test.expect(3);
+  let count = 0;
+
   yield this.defer();
-  test.equal(1, 1);
+  test.equal(count, 0);
+
+  setImmediate(function () {
+    count++;
+  });
+  setImmediate(function () {
+    count++;
+  });
+  test.equal(count, 0);
+
+  yield this.defer();
+  test.equal(count, 2);
+
   test.done();
 }
 
-exports['Test defer (yield)'] = function (test) {
-  koroutine.run(testDefer, 100, test);
+exports['Test defer'] = function (test) {
+  koroutine.run(testDefer, 0, test);
 };
 
 function testDoneLatch (test, limit) {
@@ -176,9 +264,9 @@ exports['Test sequential async calls in multiple simultaneous coroutines'] = fun
 exports['Test parallel async calls in multiple simultaneous coroutines'] = function (test) {
   test.expect = testExpectAccumulator(test);
   test.done = testDoneLatch(test, 3);
-  koroutine.run(testParallelCalls, 1000, test);
-  koroutine.run(testParallelCalls, 1000, test);
-  koroutine.run(testParallelCalls, 1000, test);
+  koroutine.run(testParallelCalls, 8000, test);
+  koroutine.run(testParallelCalls, 8000, test);
+  koroutine.run(testParallelCalls, 8000, test);
 };
 
 exports['Test mixed calls in multiple simultaneous coroutines'] = function (test) {
@@ -214,8 +302,51 @@ function * testExceptionThrower (test) {
 
 exports['Test coroutine throwing uncaught exception'] = function (test) {
   try {
-    koroutine.run(testExceptionThrower, 1000, test);
+    koroutine.run(testExceptionThrower, 0, test);
   } catch (e) {
     test.done();
   }
+};
+
+exports['Test coroutine throwing error with timeout'] = function (test) {
+  try {
+    koroutine.run(testExceptionThrower, 10);
+  } catch (e) {
+    test.done();
+  }
+};
+
+function resetFuture (ft) {
+  ft.done = false;
+  ft.data = null;
+  ft.error = null;
+}
+
+function* testFutureReset (test) {
+  test.expect(7);
+
+  const ft = this.future();
+  asyncCallSuccess('input-1', ft, 200);
+  let numErrors = yield* koroutine.join(ft);
+  test.equal(numErrors, 0);
+  test.deepEqual(ft.data, ['input-1', 'arg-1', 'arg-2']);
+
+  resetFuture(ft);
+  asyncCallError('error-1', ft, 100);
+  numErrors = yield* koroutine.join(ft);
+  test.equal(numErrors, 1);
+  test.equal(ft.error.message, 'error-1');
+  test.equal(ft.error.cause, 'exception');
+
+  resetFuture(ft);
+  asyncCallSuccess('input-2', ft, 300);
+  numErrors = yield* koroutine.join(ft);
+  test.equal(numErrors, 0);
+  test.deepEqual(ft.data, ['input-2', 'arg-1', 'arg-2']);
+
+  test.done();
+}
+
+exports['Test future reset'] = function (test) {
+  koroutine.run(testFutureReset, 2000, test);
 };
