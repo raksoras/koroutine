@@ -45,7 +45,7 @@ function* exampleCoroutine (input) {
     try {
         const result = yield dummyAsyncSuccessCall (input, koroutine.resume);
         console.log(result);
-        yield dummyAsyncErrorCall (result, this.resume);
+        yield dummyAsyncErrorCall (result, koroutine.resume);
     } catch (e) {
         console.log(e);
     }
