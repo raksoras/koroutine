@@ -1,4 +1,8 @@
-# Koroutine - A small, lightweight coroutine scheduler for Node.js
+# Koroutine 
+[![Build Status](https://travis-ci.org/raksoras/koroutine.svg?branch=master)](https://travis-ci.org/raksoras/koroutine)
+[![Coverage Status](https://coveralls.io/repos/github/raksoras/koroutine/badge.svg?branch=master)](https://coveralls.io/github/raksoras/koroutine?branch=master)
+
+## A small, lightweight coroutine scheduler for Node.js
 
 Justifiably or not, Node.js is much maligned for it's [callback hell](http://callbackhell.com/) problem. [Koroutine](https://github.com/raksoras/koroutine) is a small, 100% Javascript library that lets you write simple, sequential looking code that's still 100% async. 
 
