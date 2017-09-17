@@ -1,0 +1,27 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+"version": "0.1.0",
+  "command": "sh",
+  "args": [
+    "-c"
+  ],
+  "isShellCommand": true,
+  "showOutput": "always",
+  "suppressTaskName": true,
+  "tasks": [
+    {
+      "taskName": "nodeunit current file",
+      "isTestCommand": true,
+      "args": [
+        "${workspaceRoot}/node_modules/nodeunit/bin/nodeunit ${relativeFile}"
+      ]
+    },
+    {
+      "taskName": "nodeunit all",
+      "args": [
+        "${workspaceRoot}/node_modules/nodeunit/bin/nodeunit"
+      ]
+    }
+  ]
+}
