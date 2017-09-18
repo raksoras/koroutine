@@ -391,3 +391,30 @@ function* testFutureReset (test) {
 exports['Test future reset'] = function (test) {
   koroutine.create(testFutureReset, 2000, test).run();
 };
+
+exports['Test future() fail without active koroutine'] = function (test) {
+  try {
+    koroutine.future();
+    test.ok(false);
+  } catch (e) {
+    test.done();
+  }
+};
+
+exports['Test sleep() fail without active koroutine'] = function (test) {
+  try {
+    koroutine.sleep(10);
+    test.ok(false);
+  } catch (e) {
+    test.done();
+  }
+};
+
+exports['Test defer() fail without active koroutine'] = function (test) {
+  try {
+    koroutine.defer();
+    test.ok(false);
+  } catch (e) {
+    test.done();
+  }
+};
