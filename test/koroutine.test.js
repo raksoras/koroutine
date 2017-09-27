@@ -43,6 +43,47 @@ function* testSequentialCalls (test) {
   test.done();
 }
 
+exports['Test koroutine.callback() fail when koroutine not started'] = function (test) {
+  try {
+    asyncCallSuccess('input-1', koroutine.callback(), 100);
+    test.equals(1, 2);
+  } catch (ex) {
+    test.done();
+  }
+};
+
+function testNotGeneratorFunction () {
+  return function () {
+    console.log('####################### SHOULD NEVER GET PRINTED!!! #######################');
+  };
+}
+
+exports['Test koroutine.run() fail without iterator'] = function (test) {
+  try {
+    koroutine.run(testNotGeneratorFunction());
+    test.equals(1, 2);
+  } catch (ex) {
+    test.done();
+  }
+};
+
+function* dummy () {
+  yield true;
+}
+
+function* reentrantCoroutine () {
+  koroutine.run(dummy());
+}
+
+exports['Test reentrant koroutine '] = function (test) {
+  koroutine.setErrorHandler((e) => test.done());
+  try {
+    koroutine.run(reentrantCoroutine());
+  } catch (ex) {
+    test.done();
+  }
+};
+
 exports['Test sequential async calls'] = function (test) {
   koroutine.run(testSequentialCalls(test));
 };
@@ -112,6 +153,23 @@ exports['Test futures mixed with yield'] = function (test) {
   koroutine.run(testMixedCalls(test));
 };
 
+function* callbackTimeout (test) {
+  try {
+    yield asyncCallSuccess('input-1', koroutine.callback(10), 100);
+    test.equal(1, 2);
+  } catch (e) {
+    test.done();
+  }
+}
+
+exports['Test callback timeout'] = function (test) {
+  koroutine.run(callbackTimeout(test));
+};
+
+exports['Test futures mixed with yield'] = function (test) {
+  koroutine.run(testMixedCalls(test));
+};
+
 exports['Test future timeout'] = function (test) {
   koroutine.run((function* (test) {
     test.expect(4);
@@ -141,7 +199,7 @@ exports['Test koroutine timeout with future'] = function (test) {
       const ft = koroutine.future(100);
       asyncCallSuccess('input-2', ft, 300);
       yield* koroutine.join(ft);
-      test.ok(false);
+      test.equals(1, 2);
     } catch (e) {
       test.equal(e.cause, 'TimedOut');
       test.done();
@@ -191,7 +249,7 @@ exports['Test continue after error'] = function (test) {
     test.expect(3);
     try {
       yield* sequentialCallError('error-1', 150);
-      test.ok(false);
+      test.equals(1, 2);
     } catch (e) {
       test.equal(e.message, 'error-1');
       test.equal(e.cause, 'Exception');
@@ -208,7 +266,7 @@ function* testSleep (test) {
   const start = Date.now();
   yield koroutine.sleep(100);
   const end = Date.now();
-  test.ok((end - start) >= 100, (end - start));
+  test.ok((end - start) >= 90, (end - start));
   test.done();
 };
 
@@ -327,7 +385,7 @@ exports['Test coroutine throwing error with timeout'] = function (test) {
 exports['Test future() fail without active koroutine'] = function (test) {
   try {
     koroutine.future();
-    test.ok(false);
+    test.equals(1, 2);
   } catch (e) {
     test.done();
   }
@@ -336,7 +394,7 @@ exports['Test future() fail without active koroutine'] = function (test) {
 exports['Test sleep() fail without active koroutine'] = function (test) {
   try {
     koroutine.sleep(10);
-    test.ok(false);
+    test.equals(1, 2);
   } catch (e) {
     test.done();
   }
@@ -345,7 +403,7 @@ exports['Test sleep() fail without active koroutine'] = function (test) {
 exports['Test defer() fail without active koroutine'] = function (test) {
   try {
     koroutine.defer();
-    test.ok(false);
+    test.equals(1, 2);
   } catch (e) {
     test.done();
   }
@@ -372,7 +430,7 @@ exports['Test with stack tracing disabled'] = function (test) {
   koroutine.run(testStackTracing('test stack tracing disabled'));
 };
 
-exports['Test with stack tracing enabled'] = function (test) {
+exports['Test with stack tracing enabled globally'] = function (test) {
   const errHandlerFn = function (err) {
     const log = err.stack;
     // console.log(log);
@@ -385,6 +443,24 @@ exports['Test with stack tracing enabled'] = function (test) {
     test.done();
   };
   koroutine.setErrorHandler(errHandlerFn);
+  koroutine.enableBreadcrumbs(true);
+  koroutine.run(testStackTracing('test stack tracing enabled'), {name: 'test-stack-tracing'});
+};
+
+exports['Test with stack tracing enabled locally'] = function (test) {
+  const errHandlerFn = function (err) {
+    const log = err.stack;
+    // console.log(log);
+    test.expect(5);
+    test.ok(err.message.startsWith('Unhandled exception in koroutine'));
+    test.ok(!log.includes('next (native)'));
+    test.equal((log.match(/testStackTracing/g) || []).length, 3);
+    test.ok(log.includes('test-stack-tracing suspended at'));
+    test.ok(log.split('\n').length > 5);
+    test.done();
+  };
+  koroutine.setErrorHandler(errHandlerFn);
+  koroutine.enableBreadcrumbs(false);
   koroutine.run(testStackTracing('test stack tracing enabled'), {enableBreadcrumbs: true, name: 'test-stack-tracing'});
 };
 
@@ -396,7 +472,7 @@ function* multipleLiveCallback () {
 exports['Test multiple live callback fail'] = function (test) {
   try {
     koroutine.run(multipleLiveCallback(), {errorHandler: (err) => { throw err; }});
-    test.ok(false);
+    test.equals(1, 2);
   } catch (e) {
     test.done();
   }
