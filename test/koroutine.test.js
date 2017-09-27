@@ -2,8 +2,8 @@
 
 const koroutine = require('..');
 
-koroutine.enableBreadcrumbs(false);
-koroutine.setErrorHandler(() => {});
+// koroutine.enableBreadcrumbs(false);
+// koroutine.setErrorHandler(() => {});
 
 function asyncCallSuccess (input, callback, delay) {
   setTimeout(function () {
@@ -44,7 +44,7 @@ function* testSequentialCalls (test) {
 }
 
 exports['Test sequential async calls'] = function (test) {
-  koroutine.create(testSequentialCalls(test)).run();
+  koroutine.run(testSequentialCalls(test));
 };
 
 function* testParallelCalls (test) {
@@ -70,7 +70,7 @@ function* testParallelCalls (test) {
 }
 
 exports['Test parallel async calls'] = function (test) {
-  koroutine.create(testParallelCalls(test)).run();
+  koroutine.run(testParallelCalls(test));
 };
 
 function* testMixedCalls (test) {
@@ -109,11 +109,11 @@ function* testMixedCalls (test) {
 }
 
 exports['Test futures mixed with yield'] = function (test) {
-  koroutine.create(testMixedCalls(test)).run();
+  koroutine.run(testMixedCalls(test));
 };
 
 exports['Test future timeout'] = function (test) {
-  koroutine.create((function* (test) {
+  koroutine.run((function* (test) {
     test.expect(4);
 
     const f1 = koroutine.future(100);
@@ -131,11 +131,11 @@ exports['Test future timeout'] = function (test) {
     test.deepEqual(f2.data, ['input-2', 'arg-1', 'arg-2']);
     test.equal(f3.error.cause, 'TimedOut');
     test.done();
-  })(test)).run();
+  })(test));
 };
 
 exports['Test koroutine timeout with future'] = function (test) {
-  koroutine.create((function* (test) {
+  koroutine.run((function* (test) {
     test.expect(1);
     try {
       const ft = koroutine.future(100);
@@ -146,7 +146,7 @@ exports['Test koroutine timeout with future'] = function (test) {
       test.equal(e.cause, 'TimedOut');
       test.done();
     }
-  })(test), {timeout: 10}).run();
+  })(test), {timeout: 10});
 };
 
 function* testSequentialCallTimeout (test) {
@@ -160,7 +160,7 @@ function* testSequentialCallTimeout (test) {
 }
 
 exports['Test sequential call timeout'] = function (test) {
-  koroutine.create(testSequentialCallTimeout(test), {timeout: 10}).run();
+  koroutine.run(testSequentialCallTimeout(test), {timeout: 10});
 };
 
 function* testParallelCallsTimeout (test) {
@@ -183,47 +183,11 @@ function* testParallelCallsTimeout (test) {
 }
 
 exports['Test parallel calls timeout'] = function (test) {
-  koroutine.create(testParallelCallsTimeout(test), {timeout: 400}).run();
-};
-
-function* testInterruptCoroutine (test) {
-  test.expect(1);
-  try {
-    yield* sequentialCallSuccess('input-1', 2000);
-  } catch (e) {
-    test.equal(e.cause, 'Interrupted');
-    test.done();
-  }
-}
-
-exports['Test interrupt'] = function (test) {
-  const kr = koroutine.create(testInterruptCoroutine(test));
-  kr.run();
-  kr.interrupt();
-};
-
-function* testContinueAfterInterrupt (test) {
-  test.expect(2);
-  try {
-    yield* sequentialCallSuccess('input-1', 1000);
-    test.ok(false);
-  } catch (e) {
-    test.equal(e.cause, 'Interrupted');
-  }
-
-  let result = yield* sequentialCallSuccess('input-2', 100);
-  test.deepEqual(result, ['input-2', 'arg-1', 'arg-2']);
-  test.done();
-}
-
-exports['Test continue after interrupt'] = function (test) {
-  const kr = koroutine.create(testContinueAfterInterrupt(test));
-  kr.run();
-  kr.interrupt();
+  koroutine.run(testParallelCallsTimeout(test), {timeout: 400});
 };
 
 exports['Test continue after error'] = function (test) {
-  koroutine.create((function* (test) {
+  koroutine.run((function* (test) {
     test.expect(3);
     try {
       yield* sequentialCallError('error-1', 150);
@@ -236,7 +200,7 @@ exports['Test continue after error'] = function (test) {
     let result = yield* sequentialCallSuccess('input-2', 100);
     test.deepEqual(result, ['input-2', 'arg-1', 'arg-2']);
     test.done();
-  })(test)).run();
+  })(test));
 };
 
 function* testSleep (test) {
@@ -249,7 +213,7 @@ function* testSleep (test) {
 };
 
 exports['Test sleep'] = function (test) {
-  koroutine.create(testSleep(test)).run();
+  koroutine.run(testSleep(test));
 };
 
 function* testDefer (test) {
@@ -274,7 +238,7 @@ function* testDefer (test) {
 }
 
 exports['Test defer'] = function (test) {
-  koroutine.create(testDefer(test)).run();
+  koroutine.run(testDefer(test));
 };
 
 function testDoneLatch (test, limit) {
@@ -300,44 +264,44 @@ function testExpectAccumulator (test) {
 exports['Test sequential async calls in multiple simultaneous coroutines'] = function (test) {
   test.expect = testExpectAccumulator(test);
   test.done = testDoneLatch(test, 3);
-  koroutine.create(testSequentialCalls(test)).run();
-  koroutine.create(testSequentialCalls(test)).run();
-  koroutine.create(testSequentialCalls(test)).run();
+  koroutine.run(testSequentialCalls(test));
+  koroutine.run(testSequentialCalls(test));
+  koroutine.run(testSequentialCalls(test));
 };
 
 exports['Test parallel async calls in multiple simultaneous coroutines'] = function (test) {
   test.expect = testExpectAccumulator(test);
   test.done = testDoneLatch(test, 3);
-  koroutine.create(testParallelCalls(test), {timeout: 8000}).run();
-  koroutine.create(testParallelCalls(test), {timeout: 8000}).run();
-  koroutine.create(testParallelCalls(test), {timeout: 8000}).run();
+  koroutine.run(testParallelCalls(test), {timeout: 8000});
+  koroutine.run(testParallelCalls(test), {timeout: 8000});
+  koroutine.run(testParallelCalls(test), {timeout: 8000});
 };
 
 exports['Test mixed calls in multiple simultaneous coroutines'] = function (test) {
   test.expect = testExpectAccumulator(test);
   test.done = testDoneLatch(test, 6);
-  koroutine.create(testSequentialCalls(test), {timeout: 2000}).run();
-  koroutine.create(testParallelCalls(test), {timeout: 1000}).run();
-  koroutine.create(testSequentialCalls(test), {timeout: 2000}).run();
-  koroutine.create(testParallelCalls(test), {timeout: 1000}).run();
-  koroutine.create(testParallelCalls(test), {timeout: 1000}).run();
-  koroutine.create(testSequentialCalls(test), {timeout: 2000}).run();
+  koroutine.run(testSequentialCalls(test), {timeout: 2000});
+  koroutine.run(testParallelCalls(test), {timeout: 1000});
+  koroutine.run(testSequentialCalls(test), {timeout: 2000});
+  koroutine.run(testParallelCalls(test), {timeout: 1000});
+  koroutine.run(testParallelCalls(test), {timeout: 1000});
+  koroutine.run(testSequentialCalls(test), {timeout: 2000});
 };
 
-function* testCoroutineCurrentCtx (test, delay, input) {
+function* testCoroutineCurrentState (test, delay, input) {
   test.expect(1);
-  koroutine.context.my_var = input;
+  koroutine.state.my_var = input;
   yield koroutine.sleep(delay);
-  test.equal(koroutine.context.my_var, input);
+  test.equal(koroutine.state.my_var, input);
   test.done();
 };
 
 exports['Test koroutine current context'] = function (test) {
   test.expect = testExpectAccumulator(test);
   test.done = testDoneLatch(test, 3);
-  koroutine.create(testCoroutineCurrentCtx(test, 100, 'first')).run();
-  koroutine.create(testCoroutineCurrentCtx(test, 200, 'second')).run();
-  koroutine.create(testCoroutineCurrentCtx(test, 150, 'third')).run();
+  koroutine.run(testCoroutineCurrentState(test, 100, 'first'));
+  koroutine.run(testCoroutineCurrentState(test, 200, 'second'));
+  koroutine.run(testCoroutineCurrentState(test, 150, 'third'));
 };
 
 function* testExceptionThrower (test) {
@@ -349,7 +313,7 @@ exports['Test coroutine throwing uncaught exception'] = function (test) {
     test.ok(e);
     test.done();
   });
-  koroutine.create(testExceptionThrower(test)).run();
+  koroutine.run(testExceptionThrower(test));
 };
 
 exports['Test coroutine throwing error with timeout'] = function (test) {
@@ -357,7 +321,7 @@ exports['Test coroutine throwing error with timeout'] = function (test) {
     test.ok(e);
     test.done();
   });
-  koroutine.create(testExceptionThrower(test), {timeout: 10}).run();
+  koroutine.run(testExceptionThrower(test), {timeout: 10});
 };
 
 exports['Test future() fail without active koroutine'] = function (test) {
@@ -405,7 +369,7 @@ exports['Test with stack tracing disabled'] = function (test) {
     test.done();
   };
   koroutine.setErrorHandler(errHandlerFn);
-  koroutine.create(testStackTracing('test stack tracing disabled')).run();
+  koroutine.run(testStackTracing('test stack tracing disabled'));
 };
 
 exports['Test with stack tracing enabled'] = function (test) {
@@ -421,7 +385,7 @@ exports['Test with stack tracing enabled'] = function (test) {
     test.done();
   };
   koroutine.setErrorHandler(errHandlerFn);
-  koroutine.create(testStackTracing('test stack tracing enabled'), {enableBreadcrumbs: true, name: 'test-stack-tracing'}).run();
+  koroutine.run(testStackTracing('test stack tracing enabled'), {enableBreadcrumbs: true, name: 'test-stack-tracing'});
 };
 
 function* multipleLiveCallback () {
@@ -431,7 +395,7 @@ function* multipleLiveCallback () {
 
 exports['Test multiple live callback fail'] = function (test) {
   try {
-    koroutine.create(multipleLiveCallback(), {errorHandler: (err) => { throw err; }}).run();
+    koroutine.run(multipleLiveCallback(), {errorHandler: (err) => { throw err; }});
     test.ok(false);
   } catch (e) {
     test.done();
