@@ -1,6 +1,6 @@
 {
   "name": "koroutine",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Small, lightweight coroutine scheduler for node based on ES6 generators",
   "main": "index.js",
   "scripts": {
