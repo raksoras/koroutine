@@ -166,6 +166,19 @@ exports['Test callback timeout'] = function (test) {
   koroutine.run(callbackTimeout(test));
 };
 
+function* callbackTimeoutsRace (test) {
+  test.expect(2);
+  const result1 = yield asyncCallSuccess('input-1', koroutine.callback(50), 10);
+  test.deepEqual(result1, ['input-1', 'arg-1', 'arg-2']);
+  const result2 = yield asyncCallSuccess('input-2', koroutine.callback(), 400);
+  test.deepEqual(result2, ['input-2', 'arg-1', 'arg-2']);
+  test.done();
+}
+
+exports['Test multiple callbacks timeout race condition'] = function (test) {
+  koroutine.run(callbackTimeoutsRace(test));
+};
+
 exports['Test futures mixed with yield'] = function (test) {
   koroutine.run(testMixedCalls(test));
 };
