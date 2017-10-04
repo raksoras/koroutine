@@ -43,6 +43,14 @@ function* testSequentialCalls (test) {
   test.done();
 }
 
+function* alwaysThrows () {
+  throw new Error('ERROR');
+}
+
+exports['Test koroutine error handler function'] = function (test) {
+  koroutine.run(alwaysThrows(), {errorHandler: () => test.done()});
+};
+
 exports['Test koroutine.callback() fail when koroutine not started'] = function (test) {
   try {
     asyncCallSuccess('input-1', koroutine.callback(), 100);
